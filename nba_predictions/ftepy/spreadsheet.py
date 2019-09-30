@@ -5,7 +5,7 @@ import io
 import os
 
 
-spreadsheet_file = "fte_spreadsheet.csv"
+spreadsheet_file = "C:/Users/Nick/workspace/nba_predictions/nba_predictions/ftepy/fte_spreadsheet.csv"
 fte_latest_url = "https://projects.fivethirtyeight.com/nba-model/nba_elo_latest.csv"
 
 def pull_spreadsheet():
