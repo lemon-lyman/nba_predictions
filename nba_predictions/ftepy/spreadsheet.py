@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import requests
 import datetime as dt
@@ -62,4 +61,3 @@ def get_fte():
 
 if __name__ == "__main__":
     df = get_fte()
-
