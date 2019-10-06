@@ -50,14 +50,14 @@ def create_today(odd_format=False):
     for i in range(len(table)):
         if '@' in table[i]['href']:
             try:
-                team_one, team_two, line_one, line_two, tipoff = parse_tag(table[i])
+                team_one, team_two, line_one, line_two, date_of_game = parse_tag(table[i])
                 try:
-                    ind = matchups.index([team_one, team_two, tipoff])
+                    ind = matchups.index([team_one, team_two, date_of_game])
                     odds[ind][0].append(line_one)
                     odds[ind][1].append(line_two)
                 except ValueError:
                     ind = len(matchups)
-                    matchups.append([team_one, team_two, tipoff])
+                    matchups.append([team_one, team_two, date_of_game])
                     odds.append([[line_one], [line_two]])
             except ValueError:
                 print('ValueError')
@@ -117,16 +117,13 @@ def parse_tag(tag):
     first_half, second_half = url.split('-@-')
     team_one = abbr(first_half.split('/')[-1])
     team_two = abbr(second_half.split('.')[0])
-    result = re.search('date/(.*)/time', url)
-    date_of_game = result.group(1)
-    temp = url.split('time/')[-1]
-    time_of_game = temp[:4]
-    tipoff = date_of_game + ' ' + time_of_game[:2] + ':' + time_of_game[2:]
+    result = re.search('date/(.*)', url)
+    date_of_game = result.group(1).split('#')[0]
 
     whole_line = str(tag)
-    bleh, string_one, almost_two = whole_line.split('<br/>')
+    _, string_one, almost_two = whole_line.split('<br/>')
     string_two = almost_two.split('\n', 1)[0]
-    return team_one, team_two, int(string_one), int(string_two), tipoff
+    return team_one, team_two, int(string_one), int(string_two), date_of_game
 
 
 def simple_get(url):
@@ -154,9 +151,10 @@ def log_error(e):
 
 
 if __name__ == "__main__":
-start = time.time()
-matchups, odds = create_today(odd_format=True)
-df = create_df(matchups, odds)
-df_vig = vig(df)
-print('dt:', time.time() - start)
-print(df)
+    5/0
+    start = time.time()
+    matchups, odds = create_today()
+    df = create_df(matchups, odds)
+    df_vig = vig(df)
+    print('dt:', time.time() - start)
+    print(df)
