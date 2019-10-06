@@ -88,35 +88,28 @@ def create_df(matchups, odds):
     return df
 
 
-def vig(df):
-    ind = df.index
-    labels = np.asarray(ind.labels)[-2]
-    levels = ind.levels[-2]
-    all_matchups = levels[labels]
-    matchups = all_matchups[::2]
-    # df_vig = pd.DataFrame()
-    data = []
-
-    for i in range(len(matchups)):
-        temp = np.asarray(df.iloc[i * 2] + df.iloc[(i * 2) + 1]).tolist()
-
-
-##        if i == 0:
-##            data = temp
-##        else:
-##            data = data.append(temp)
-####        df_temp = pd.DataFrame(data = temp, index = matchups[i])
-####        df_vig.append(df_temp)
-##
-##    df_vig = pd.DataFrame(data=data, index=matchups)
-##    return df_vig
-
-
 def parse_tag(tag):
+    """
+    Parses bs4 object.
+    :param tag:
+    <class 'bs4.element.Tag'> taken from the table of tags.
+
+    :return:
+    team one - string
+    team two - string
+    odds one, moneyline - string
+    odds two, moneyline - string
+    date_of_game - string e.g. 10-22-19
+    """
+
     url = tag['href']
     first_half, second_half = url.split('-@-')
     team_one = abbr(first_half.split('/')[-1])
     team_two = abbr(second_half.split('.')[0])
+
+    ## As of 10/06/19, date on LVI is formatted as e.g. '.../date/10-22-19#BT
+    ## I think the BT at the end (or J, CS, L, or X) has something to do with
+    ## the company providing the odds, BT for open and consensus.
     result = re.search('date/(.*)', url)
     date_of_game = result.group(1).split('#')[0]
 
@@ -155,6 +148,5 @@ if __name__ == "__main__":
     start = time.time()
     matchups, odds = create_today()
     df = create_df(matchups, odds)
-    df_vig = vig(df)
     print('dt:', time.time() - start)
     print(df)
