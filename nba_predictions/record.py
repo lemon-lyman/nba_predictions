@@ -7,3 +7,6 @@ def create_outcome():
     outcome_val = outcome_series.values
     trimmed_df['outcome'] = outcome_val
     return trimmed_df
+
+if __name__ == "__main__":
+    outcome = create_outcome()

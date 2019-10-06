@@ -1,4 +1,6 @@
 from ftepy.spreadsheet import get_fte
+# from ftepy.fte_predictions import something
+from record import create_outcome
 import datetime
 import numpy as np
 
