@@ -12,33 +12,30 @@ import re
 
 print('time_stamp', datetime.datetime.now().strftime("%m-%d-%y %H:%M"))
 
+
 def pad_odds(odds, max_len):
+
+    """
+    Fill out odds with None so that every row has the same number of objects
+    :param odds:
+    :param max_len:
+    :return:
+    """
+
     while len(odds) < max_len:
         odds.append(None)
     return odds
 
 
-def implied_odds(prob):
-    prob = round(prob)
-    if prob < 1:
-        prob = prob * 100
-    if prob > 50:
-        left = 100 - prob
-        moneyline = -(100 * prob / left)
-    else:
-        moneyline = (10000 / prob) - 100
-    return moneyline
+def create_today():
 
+    """
 
-def implied_prob(moneyline):
-    if moneyline > 0:
-        prob = 100 / (moneyline + 100)
-    else:
-        prob = (moneyline / (moneyline - 100))
-    return prob
+    :return:
+    matchups:
+    odds:
+    """
 
-
-def create_today(odd_format=False):
     url = 'http://www.vegasinsider.com/nba/odds/las-vegas/money/'
     raw = simple_get(url)
     soup = BeautifulSoup(raw, 'html.parser')
@@ -62,16 +59,16 @@ def create_today(odd_format=False):
             except ValueError:
                 print('ValueError')
                 continue
-    if odd_format:
-        for i in range(len(odds)):
-            odds[i][0] = [implied_prob(odds[i][0][x]) for x in range(len(odds[i][0]))]
-            odds[i][1] = [implied_prob(odds[i][1][x]) for x in range(len(odds[i][1]))]
+
     return matchups, odds
 
 
 def create_df(matchups, odds):
+
+    ###################################
+    # max_odds has been hardcoded to 12
     max_odds = 12
-    # print('Warning: max_odds has been hardcoded to', max_odds)
+    ###################################
 
     df = pd.DataFrame()
 
@@ -89,6 +86,7 @@ def create_df(matchups, odds):
 
 
 def parse_tag(tag):
+
     """
     Parses bs4 object.
     :param tag:
@@ -120,6 +118,13 @@ def parse_tag(tag):
 
 
 def simple_get(url):
+
+    """
+    Simple but robust url get. Copied from some stack overflow. Unfortunately, link lost.
+    :param url:
+    :return:
+    """
+
     try:
         with closing(get(url, stream=True)) as resp:
             if is_good_response(resp):
@@ -140,11 +145,17 @@ def is_good_response(resp):
 
 
 def log_error(e):
+
+    """
+    'Logs' error by printing to terminal. Current pi setup captures everything printed to terminal so error is logged
+    :param e:
+    :return:
+    """
+
     print(e)
 
 
 if __name__ == "__main__":
-    5/0
     start = time.time()
     matchups, odds = create_today()
     df = create_df(matchups, odds)
