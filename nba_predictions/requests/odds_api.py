@@ -65,6 +65,23 @@ def create_today():
 
 def create_df(matchups, odds):
 
+    """
+    df index format:
+    DAL GSW
+    DAL GSW
+    (Going with this format as of 10/10/19; More readable)
+
+    or
+
+    DAL GSW
+    GSW DAL
+
+
+    :param matchups:
+    :param odds:
+    :return:
+    """
+
     ###################################
     # max_odds has been hardcoded to 12
     max_odds = 12
@@ -76,8 +93,8 @@ def create_df(matchups, odds):
         time_stamp = datetime.datetime.now().strftime("%m-%d-%y %H:%M")
         df_temp = pd.DataFrame(
             data=[pad_odds(odd[0], max_odds), pad_odds(odd[1], max_odds)],
-            index=[[time_stamp, time_stamp], [match[0] + ' ' + match[1],
-                                              match[1] + ' ' + match[0]],
+            index=[[time_stamp, time_stamp],
+                   [match[0] + ' ' + match[1], match[0] + ' ' + match[1]],
                    [match[-1], match[-1]]]
         )
         df = df.append(df_temp)
