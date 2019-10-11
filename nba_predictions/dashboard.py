@@ -26,7 +26,7 @@ def test_dashboard():
 def create_dashboard(*args):
     """
 
-    :param args: list of Models()
+    :param args: Model(), Model(), Model()...
     :return:
     """
 
@@ -41,11 +41,17 @@ def create_dashboard(*args):
 
     for model in args:
         ax.plot(model.dates, model.ongoing_average(), color=color_dict[model.label])
+        print(model.label + ": ", model.prediction_history.mean())
 
     ax.plot([model.dates[0], model.dates[-1]], [.5, .5], c='darkgrey', zorder=-1)
+
+    ## TODO: Watchout - assumes dates attribute of models is all the same
     ax.set_xlim([model.dates[0], model.dates[-1]])
     ax.set_ylim([0, 1])
+
     ax.legend([model.label for model in args])
+
+
 
     plt.show()
 
