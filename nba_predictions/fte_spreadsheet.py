@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import requests
 import datetime as dt
 import io
@@ -51,13 +52,28 @@ def pulled_recently(file_in=spreadsheet_file, seconds_passed=3600):
     tdelta = dt.datetime.now()-last_mod_dt
     return tdelta.seconds <= seconds_passed
 
-def get_fte():
-    if pulled_recently():
-        print("FTE Pulled Recently; Reading")
-        return read_spreadsheet()
+def get_fte(pull_override=None):
+    if pull_override==None:
+        if pulled_recently():
+            print("FTE Pulled Recently; Reading")
+            untrimmed_df = read_spreadsheet()
+            last_valid_ind = np.where(untrimmed_df['score1'].notnull())[0][-1]
+            return untrimmed_df.iloc[:last_valid_ind + 1, :]
+        else:
+            print("FTE Not Pulled Recently; Pulling")
+            untrimmed_df = pull_spreadsheet()
+            last_valid_ind = np.where(untrimmed_df['score1'].notnull())[0][-1]
+            return untrimmed_df.iloc[:last_valid_ind + 1, :]
+    elif pull_override:
+        print("FTE Pull Override; Pulling")
+        untrimmed_df = pull_spreadsheet()
+        last_valid_ind = np.where(untrimmed_df['score1'].notnull())[0][-1]
+        return untrimmed_df.iloc[:last_valid_ind + 1, :]
     else:
-        print("FTE Not Pulled Recently; Pulling")
-        return pull_spreadsheet()
+        print("FTE Pull Override; Reading")
+        untrimmed_df = read_spreadsheet()
+        last_valid_ind = np.where(untrimmed_df['score1'].notnull())[0][-1]
+        return untrimmed_df.iloc[:last_valid_ind + 1, :]
 
 if __name__ == "__main__":
     df = get_fte()

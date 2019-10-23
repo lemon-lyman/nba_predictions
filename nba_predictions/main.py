@@ -1,6 +1,6 @@
 from record import create_record
-from ftepy.fte_predictions import create_fte_model
 from dashboard import create_dashboard
+import models
 import datetime
 import numpy as np
 
@@ -9,13 +9,15 @@ import numpy as np
 ## TODO: Create universal format of predictions {prediction, probability/prediction-strength}
 if __name__ == "__main__":
 
-    record = create_record()
+    po = False
 
-    ## Create the various Model()s
-    ## fte = create fte (record)
-    ## LVI = create LVI (record)
-    ## Nick = create Nick (record)
+    record = create_record(pull_override=po)
 
-    # create_dashboard(FTE, LVI, Nick, Carlos, Koen)
+    carmelo = models.create_carmelo_model(record, pull_override=po)
+    carm_elo = models.create_carm_elo_model(record, pull_override=po)
+    elo = models.create_elo_model(record, pull_override=po)
 
-
+    create_dashboard(nick,
+                     carmelo,
+                     carm_elo,
+                     elo)

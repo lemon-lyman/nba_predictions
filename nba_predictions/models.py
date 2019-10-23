@@ -1,6 +1,8 @@
 import numpy as np
+import pandas as pd
 from fte_spreadsheet import get_fte
 from record import create_record
+import datetime
 
 
 class Model:
@@ -26,8 +28,28 @@ class Model:
                                                                  float(self.prediction_history.mean()),
                                                                  int(len(self.prediction_history)))
 
-def create_carmelo_model(record):
-    fte_df = get_fte()
+def create_user_model(record, user):
+
+    user_df_raw = pd.read_csv("data/" + user + ".csv")
+    last_valid_ind = np.where(user_df_raw['Pick'].notnull())[0][-1]
+    user_df = user_df_raw.iloc[:last_valid_ind + 1, :].copy()
+
+    unformatted_dates = user_df['date'].values
+    datetime_arr = [datetime.datetime.strptime(date, "%Y-%m-%d") for date in unformatted_dates]
+    dates = [date.strftime("%m/%d/%Y") for date in datetime_arr]
+
+    prediction_history = np.zeros(user_df.shape[0])
+
+    for ii in range(user_df.shape[0]):
+        if user_df['Pick'].iloc[ii] == record['winner'].iloc[ii]:
+            prediction_history[ii] = 1
+
+    return Model(prediction_history, dates, user)
+
+
+
+def create_carmelo_model(record, pull_override):
+    fte_df = get_fte(pull_override=pull_override)
     dates = fte_df['date'].values
 
     prediction_history = np.zeros(fte_df.shape[0])
@@ -50,10 +72,10 @@ def create_carmelo_model(record):
                 prediction_history[ii] = 1
 
 
-    return Model(prediction_history, dates, "Carmelo")
+    return Model(prediction_history, dates, "CARMELO")
 
-def create_carm_elo_model(record):
-    fte_df = get_fte()
+def create_carm_elo_model(record, pull_override):
+    fte_df = get_fte(pull_override=pull_override)
     dates = fte_df['date'].values
 
     prediction_history = np.zeros(fte_df.shape[0])
@@ -76,10 +98,10 @@ def create_carm_elo_model(record):
                 prediction_history[ii] = 1
 
 
-    return Model(prediction_history, dates, "Carm-elo")
+    return Model(prediction_history, dates, "CARM-ELO")
 
-def create_elo_model(record):
-    fte_df = get_fte()
+def create_elo_model(record, pull_override):
+    fte_df = get_fte(pull_override=pull_override)
     dates = fte_df['date'].values
 
     prediction_history = np.zeros(fte_df.shape[0])
@@ -102,14 +124,17 @@ def create_elo_model(record):
                 prediction_history[ii] = 1
 
 
-    return Model(prediction_history, dates, "elo")
+    return Model(prediction_history, dates, "ELO")
 
 def create_lvi_model():
     pass
 
-def create_user_model():
+
+
+
     pass
 
 if __name__ == "__main__":
     record = create_record()
-    carmelo = create_carmelo_model(record)
+
+

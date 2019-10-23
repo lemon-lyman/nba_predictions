@@ -10,9 +10,6 @@ import datetime
 import re
 
 
-print('time_stamp', datetime.datetime.now().strftime("%m-%d-%y %H:%M"))
-
-
 def pad_odds(odds, max_len):
 
     """
@@ -94,7 +91,7 @@ def create_df(matchups, odds):
         df_temp = pd.DataFrame(
             data=[pad_odds(odd[0], max_odds), pad_odds(odd[1], max_odds)],
             index=[[time_stamp, time_stamp],
-                   [match[0] + ' ' + match[1], match[0] + ' ' + match[1]],
+                   [match[0] + ' ' + match[1], match[1] + ' ' + match[0]],
                    [match[-1], match[-1]]]
         )
         df = df.append(df_temp)
@@ -173,8 +170,11 @@ def log_error(e):
 
 
 if __name__ == "__main__":
+    ## Raspberry Pi stuff. Probably don't need to run this script.
     start = time.time()
     matchups, odds = create_today()
     df = create_df(matchups, odds)
+    df.to_csv("odds.csv", mode='a', header=False)
+    print()
+    print(datetime.datetime.now().strftime("%m-%d-%y %H:%M"))
     print('dt:', time.time() - start)
-    print(df)
