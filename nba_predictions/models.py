@@ -11,12 +11,30 @@ class Model:
         self.prediction_history = prediction_history
         self.dates = dates
         self.label = label
+        self._ongoing_average()
+        self._consolidate()
 
-    def ongoing_average(self):
-        return [np.mean(self.prediction_history[:ii + 1]) for ii in range(len(self.prediction_history))]
+    def _ongoing_average(self):
+        self.ongoing_average = [np.mean(self.prediction_history[:ii + 1]) for ii in range(len(self.prediction_history))]
 
     def moving_average(self, prediction_history, window=10):
+        ## TODO
         pass
+
+    def _consolidate(self):
+
+        self.consolidated_dates = list(np.unique(self.dates))
+        self.consolidated_predictions = np.zeros(len(self.consolidated_dates))
+
+        temp_date = self.dates[0]
+
+        count = 0
+        for idx, date in enumerate(self.dates):
+            if date != temp_date:
+                temp_date = date
+                count += 1
+            self.consolidated_predictions[count] = self.ongoing_average[idx]
+
 
     def __repr__(self):
         return '\nModel: {}\nAccuracy: {:.3f}\nGames: {}\n'.format(self.label,
@@ -30,23 +48,60 @@ class Model:
 
 def create_user_model(record, user):
 
-    user_df_raw = pd.read_csv("data/" + user + ".csv")
-    last_valid_ind = np.where(user_df_raw['Pick'].notnull())[0][-1]
-    user_df = user_df_raw.iloc[:last_valid_ind + 1, :].copy()
+    user_df_raw = pd.read_csv("data/" + user + " - fte_spreadsheet.csv")
+    valid_rows = user_df_raw.dropna()
 
-    unformatted_dates = user_df['date'].values
-    datetime_arr = [datetime.datetime.strptime(date, "%Y-%m-%d") for date in unformatted_dates]
-    dates = [date.strftime("%m/%d/%Y") for date in datetime_arr]
+    dates = []
+    prediction_history = []
 
-    prediction_history = np.zeros(user_df.shape[0])
+    for ii in range(valid_rows.shape[0]):
 
-    for ii in range(user_df.shape[0]):
-        if user_df['Pick'].iloc[ii] == record['winner'].iloc[ii]:
-            prediction_history[ii] = 1
+        team1 = valid_rows['Home'].iloc[ii]
+        team2 = valid_rows['Away'].iloc[ii]
 
-    return Model(prediction_history, dates, user)
+        date_ymd = valid_rows['Date'].iloc[ii] ## YYYY-m-d
+        date_split_out = date_ymd.split('-')
+        date_mdy = date_split_out[1] + "/" + date_split_out[2] + "/" + date_split_out[0] ## m/d/YYYY
+
+        try:
+            record.loc[date_ymd, team1 + " " + team2]['winner']
+        except KeyError:
+            continue
+
+        dates.append(date_ymd)
+
+        if valid_rows['Pick'].iloc[ii] == record.loc[date_ymd, team1 + " " + team2]['winner']:
+            prediction_history.append(1)
+        else:
+            prediction_history.append(0)
+
+    return Model(np.asarray(prediction_history), dates, user)
+
+def create_raptor_model(record, pull_override):
+    fte_df = get_fte(pull_override=pull_override)
+    dates = fte_df['date'].values
+
+    prediction_history = np.zeros(fte_df.shape[0])
+
+    for ii in range(fte_df.shape[0]):
+
+        date = fte_df['date'].iloc[ii]
+
+        prob1 = fte_df['raptor_prob1'].iloc[ii]
+        prob2 = fte_df['raptor_prob2'].iloc[ii]
+
+        team1 = fte_df['team1'].iloc[ii]
+        team2 = fte_df['team2'].iloc[ii]
+
+        if prob1 > prob2:
+            if record.loc[date, team1 + " " + team2]['winner'] == team1:
+                prediction_history[ii] = 1
+        else:
+            if record.loc[date, team1 + " " + team2]['winner'] == team2:
+                prediction_history[ii] = 1
 
 
+    return Model(prediction_history, dates, "RAPTOR")
 
 def create_carmelo_model(record, pull_override):
     fte_df = get_fte(pull_override=pull_override)
