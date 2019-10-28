@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-def foo(*args):
-    for idx, x in enumerate(args):
-        print(idx)
+for ii in range(10):
+    if ii > 3:
+        if ii < 7:
+            continue
+    print(ii)
