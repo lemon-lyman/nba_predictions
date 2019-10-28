@@ -31,24 +31,28 @@ def test_dashboard():
     create_dashboard(model_a, model_b, model_c, model_d, model_e)
 
 
-def create_ticks(dates):
+def create_ticks(dates, every=True):
     """
 
     :param dates: MM/DD/YYYY
     :return: tick_locations (datenum object), tick_labels
     """
-    datenums = format_dates(dates)
-    first_date = datenums[0]
-    last_date = datenums[-1]
+    if every:
+        ticks = format_dates(dates)
+        tick_labels = [d.split('-')[1] + "/" + d.split('-')[2] for d in dates]
+    else:
+        datenums = format_dates(dates)
+        first_date = datenums[0]
+        last_date = datenums[-1]
 
-    ticks = [first_date]
+        ticks = [first_date]
 
-    while ticks[-1] < last_date:
-        ticks.append(ticks[-1]+7)
+        while ticks[-1] < last_date:
+            ticks.append(ticks[-1]+7)
 
-    tick_labels_dt = [datetime.datetime.fromordinal(int(tick)) for tick in ticks]
+        tick_labels_dt = [datetime.datetime.fromordinal(int(tick)) for tick in ticks]
 
-    tick_labels = [tick.strftime('%m/%d') for tick in tick_labels_dt]
+        tick_labels = [tick.strftime('%m/%d') for tick in tick_labels_dt]
 
     return ticks, tick_labels
 
@@ -56,11 +60,18 @@ def format_dates(dates):
 
     datenums = []
 
+    # for d in dates:
+    #     d_split = d.split('/')
+    #     dt = datetime.date(int(d_split[-1]),
+    #                        int(d_split[0]),
+    #                        int(d_split[1]))
+    #     datenums.append(date2num(dt))
+
     for d in dates:
-        d_split = d.split('/')
-        dt = datetime.date(int(d_split[-1]),
-                           int(d_split[0]),
-                           int(d_split[1]))
+        d_split = d.split('-')
+        dt = datetime.date(int(d_split[0]),
+                           int(d_split[1]),
+                           int(d_split[2]))
         datenums.append(date2num(dt))
 
     return datenums
@@ -75,8 +86,8 @@ def create_dashboard(*args):
 
     sec_in_week = ()
 
-    color_dict = {'CARMELO': 'darkorange',
-                  'CARM_ELO': 'sandybrown',
+    color_dict = {'RAPTOR': 'r',
+                  'CARM-ELO': 'sandybrown',
                   'ELO': 'cornflowerblue',
                   'LVI': 'r',
                   'Nick': 'cyan',
@@ -88,11 +99,11 @@ def create_dashboard(*args):
     print()
 
     for model in args:
-        ax.plot(format_dates(model.dates), model.ongoing_average(), color=color_dict[model.label])
+        ax.plot(format_dates(model.consolidated_dates), model.consolidated_predictions, color=color_dict[model.label])
         print(model.label + ": ", model.prediction_history.mean())
 
     ax.plot([format_dates([model.dates[0]]),
-             format_dates([model.dates[-1]])], [.5, .5], c='darkgrey', zorder=-1)
+             format_dates([model.dates[-1]])], [.5, .5], c='darkgrey', ls='--', zorder=-1, alpha=.5)
 
     xticks, xtick_labels = create_ticks(model.dates)
 
