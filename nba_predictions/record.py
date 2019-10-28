@@ -32,4 +32,4 @@ def create_record(pull_override=None):
     return record
 
 if __name__ == "__main__":
-    outcome = create_record()
+    record = create_record()
