@@ -9,6 +9,7 @@ class Model:
 
     def __init__(self, prediction_history, dates, label):
         self.prediction_history = prediction_history
+        self.accuracy = self.prediction_history.mean()
         self.dates = dates
         self.label = label
         self._ongoing_average()
