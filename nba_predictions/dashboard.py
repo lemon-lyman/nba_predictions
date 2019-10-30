@@ -76,7 +76,6 @@ def format_dates(dates):
 
     return datenums
 
-
 def create_dashboard(*args):
     """
 
@@ -86,7 +85,7 @@ def create_dashboard(*args):
 
     sec_in_week = ()
 
-    color_dict = {'RAPTOR': 'r',
+    color_dict = {'RAPTOR': 'goldenrod',
                   'CARM-ELO': 'sandybrown',
                   'ELO': 'cornflowerblue',
                   'LVI': 'r',
@@ -99,7 +98,14 @@ def create_dashboard(*args):
     print()
 
     for model in args:
-        ax.plot(format_dates(model.consolidated_dates), model.consolidated_predictions, color=color_dict[model.label])
+        ax.plot(format_dates(model.consolidated_dates),
+                model.consolidated_predictions,
+                color=color_dict[model.label],
+                linewidth=1)
+
+        if model.label == "RAPTOR":
+            ax.set_title(str(len(model.prediction_history)) + " Games")
+
         print(model.label + ": ", model.prediction_history.mean())
 
     ax.plot([format_dates([model.dates[0]]),
@@ -110,13 +116,12 @@ def create_dashboard(*args):
     ax.set_xticks(xticks)
     ax.set_xticklabels(xtick_labels, rotation=45)
 
-
     ## TODO: Watchout - assumes dates attribute of models is all the same
     ax.set_xlim([format_dates([model.dates[0]])[0],
                  format_dates([model.dates[-1]])[0]])
     ax.set_ylim([0, 1])
 
-    ax.legend([model.label for model in args])
+    ax.legend(["{:.1f}% ".format(model.accuracy*100) + model.label for model in args])
 
 
 
