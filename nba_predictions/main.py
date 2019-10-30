@@ -6,18 +6,23 @@ import numpy as np
 
 
 ## Goal: Monitor ongoing performance of odds, FTE, personal models, etc.
-## TODO: Create universal format of predictions {prediction, probability/prediction-strength}
+
 if __name__ == "__main__":
 
     po = False
 
     record = create_record(pull_override=po)
 
-    carmelo = models.create_carmelo_model(record, pull_override=po)
-    carm_elo = models.create_carm_elo_model(record, pull_override=po)
+    raptor = models.create_raptor_model(record, pull_override=po)
     elo = models.create_elo_model(record, pull_override=po)
+    lvi = models.create_lvi_model(record)
+    nick = models.create_user_model(record, "Nick")
+    carlos = models.create_user_model(record, "Carlos")
+    koen = models.create_user_model(record, "Koen")
 
     create_dashboard(nick,
-                     carmelo,
-                     carm_elo,
-                     elo)
+                     carlos,
+                     koen,
+                     raptor,
+                     elo,
+                     lvi)
