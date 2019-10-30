@@ -101,12 +101,12 @@ def create_dashboard(*args):
         ax.plot(format_dates(model.consolidated_dates),
                 model.consolidated_predictions,
                 color=color_dict[model.label],
-                linewidth=1)
+                linewidth=2)
 
         if model.label == "RAPTOR":
             ax.set_title(str(len(model.prediction_history)) + " Games")
 
-        print(model.label + ": ", model.prediction_history.mean())
+        print(model.label + ": {:.3f} ".format(model.accuracy*100))
 
     ax.plot([format_dates([model.dates[0]]),
              format_dates([model.dates[-1]])], [.5, .5], c='darkgrey', ls='--', zorder=-1, alpha=.5)
@@ -119,10 +119,10 @@ def create_dashboard(*args):
     ## TODO: Watchout - assumes dates attribute of models is all the same
     ax.set_xlim([format_dates([model.dates[0]])[0],
                  format_dates([model.dates[-1]])[0]])
-    ax.set_ylim([0, 1])
-
+    ax.set_ylim([.5, 1])
     ax.legend(["{:.1f}% ".format(model.accuracy*100) + model.label for model in args])
-
+    ax.yaxis.grid(alpha=.2)
+    fig.set_size_inches(9, 5)
 
 
     plt.show()
