@@ -1,8 +1,10 @@
 import numpy as np
+import warnings
 import pandas as pd
+warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 from fte_spreadsheet import get_fte
 from record import create_record
-import datetime
+import datetime as dt
 
 
 class Model:
@@ -51,6 +53,13 @@ def create_user_model(record, user):
 
     user_df_raw = pd.read_csv("data/" + user + " - fte_spreadsheet.csv")
     valid_rows = user_df_raw.dropna()
+
+    last_date = valid_rows['Date'].iloc[-1]
+    last_date_dt = dt.datetime.strptime(last_date, "%Y-%m-%d")
+    now_full = dt.datetime.now()
+    now_simple = dt.datetime(now_full.year, now_full.month, now_full.day)
+    time_delta = last_date_dt - now_simple
+    print(user + " days ahead: " + str(time_delta.days))
 
     dates = []
     prediction_history = []
