@@ -10,7 +10,7 @@ import sys
 
 if __name__ == "__main__":
 
-    po = False
+    po = None
     if len(sys.argv) > 1:
         if "po" in sys.argv:
             po = True
