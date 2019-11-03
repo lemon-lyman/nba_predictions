@@ -1,12 +1,13 @@
 import numpy as np
 import pandas as pd
 import time
-from models import Model
+import models
 from record import create_record
 import matplotlib.pyplot as plt
 
 
-record = create_record()
+po = None
+record = create_record(pull_override=po)
 odds_raw = pd.read_csv("data/odds.csv", header=None)
 
 dates_mdy = odds_raw[2].values
@@ -17,7 +18,6 @@ for date in dates_mdy:
 odds_raw[2] = dates_ymd
 
 matchups_lvi = odds_raw[1].values
-
 
 ## Format team names. LVI uses different abbreviations than fte for these three teams
 lvi2npw = {'BKN': 'BRK',
@@ -37,23 +37,31 @@ for idx, m_lvi in enumerate(matchups_lvi):
     matchups_npw.append(team1 + " " + team2)
 odds_raw[1] = matchups_npw
 
+odds_raw = odds_raw.set_index([2, 1]).drop(0, axis=1)  ## Drops the column of rpi scrape-times
 
-odds_raw = odds_raw.set_index([2, 1]).drop(0, axis=1) ## Drops the column of rpi scrape-times
+matchups = list(np.unique(odds_raw.index))
 
-matchups = np.unique(odds_raw.index)
 dates = []
 prediction_history = []
-for ii in range(0, matchups.shape[0], 2):
+while len(matchups) > 0:
 
-    date = matchups[ii][0]
-    team1, team2 = matchups[ii][1].split(" ")
+    matchup_initial = matchups.pop()
+
+    date = matchup_initial[0]
+
+    team1, team2 = matchup_initial[1].split(" ")
+
+    matchup_switched = (matchup_initial[0], team2 + " " + team1)
+    matchups.pop(matchups.index(matchup_switched))
+
     team1_ml = odds_raw.loc[date, team1 + " " + team2].iloc[-1].mean()
     team2_ml = odds_raw.loc[date, team2 + " " + team1].iloc[-1].mean()
+
     try:
-        winner = record.loc[matchups[ii][0], team2 + " " + team1]['winner']
+        winner = record.loc[matchup_initial[0], team2 + " " + team1]['winner']
     except KeyError:
         try:
-            winner = record.loc[matchups[ii][0], team1 + " " + team2]['winner']
+            winner = record.loc[matchup_initial[0], team1 + " " + team2]['winner']
         except KeyError:
             break
 
@@ -69,4 +77,4 @@ for ii in range(0, matchups.shape[0], 2):
         prediction_history.append(0)
     dates.append(date)
 
-lvi = Model(np.asarray(prediction_history), dates, "LVI")
+lvi = models.Model(np.asarray(prediction_history), dates, "LVI")
