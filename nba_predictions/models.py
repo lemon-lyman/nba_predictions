@@ -50,6 +50,12 @@ class Model:
                                                                  int(len(self.prediction_history)))
 
 def create_user_model(record, user):
+    """
+
+    :param record:
+    :param user: str - Name of user
+    :return:
+    """
 
     user_df_raw = pd.read_csv("data/" + user + " - fte_spreadsheet.csv")
     valid_rows = user_df_raw.dropna()
@@ -192,7 +198,6 @@ def create_elo_model(record, pull_override):
     return Model(prediction_history, dates, "ELO")
 
 def create_lvi_model(record):
-
     odds_raw = pd.read_csv("data/odds.csv", header=None)
 
     dates_mdy = odds_raw[2].values
@@ -224,20 +229,29 @@ def create_lvi_model(record):
 
     odds_raw = odds_raw.set_index([2, 1]).drop(0, axis=1)  ## Drops the column of rpi scrape-times
 
-    matchups = np.unique(odds_raw.index)
+    matchups = list(np.unique(odds_raw.index))
+
     dates = []
     prediction_history = []
-    for ii in range(0, matchups.shape[0], 2):
+    while len(matchups) > 0:
 
-        date = matchups[ii][0]
-        team1, team2 = matchups[ii][1].split(" ")
+        matchup_initial = matchups.pop(0)
+
+        date = matchup_initial[0]
+
+        team1, team2 = matchup_initial[1].split(" ")
+
+        matchup_switched = (matchup_initial[0], team2 + " " + team1)
+        matchups.pop(matchups.index(matchup_switched))
+
         team1_ml = odds_raw.loc[date, team1 + " " + team2].iloc[-1].mean()
         team2_ml = odds_raw.loc[date, team2 + " " + team1].iloc[-1].mean()
+
         try:
-            winner = record.loc[matchups[ii][0], team2 + " " + team1]['winner']
+            winner = record.loc[matchup_initial[0], team2 + " " + team1]['winner']
         except KeyError:
             try:
-                winner = record.loc[matchups[ii][0], team1 + " " + team2]['winner']
+                winner = record.loc[matchup_initial[0], team1 + " " + team2]['winner']
             except KeyError:
                 break
 
