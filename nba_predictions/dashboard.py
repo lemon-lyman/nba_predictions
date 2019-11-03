@@ -7,14 +7,13 @@ from models import Model
 
 
 ## Show statistics on the current success fo different models
-## TODO:
-## Success %
-## Plot of past success
-##      Scatter in background of actual data with moving average on top
-##      OR
-##      All moving overages overlaid onto one plot
+## TODO: test_dashboard
 
 def test_dashboard():
+    """
+    Doesn't work
+    :return:
+    """
 
     month = '10'
     year = '2019'
@@ -57,15 +56,13 @@ def create_ticks(dates, every=True):
     return ticks, tick_labels
 
 def format_dates(dates):
+    """
+
+    :param dates: list - date strings as 'yyyy-mm-dd'
+    :return: list - datenum objects
+    """
 
     datenums = []
-
-    # for d in dates:
-    #     d_split = d.split('/')
-    #     dt = datetime.date(int(d_split[-1]),
-    #                        int(d_split[0]),
-    #                        int(d_split[1]))
-    #     datenums.append(date2num(dt))
 
     for d in dates:
         d_split = d.split('-')
@@ -82,8 +79,6 @@ def create_dashboard(*args):
     :param args: Model(), Model(), Model()...
     :return:
     """
-
-    sec_in_week = ()
 
     color_dict = {'RAPTOR': 'goldenrod',
                   'CARM-ELO': 'sandybrown',
@@ -103,11 +98,13 @@ def create_dashboard(*args):
                 color=color_dict[model.label],
                 linewidth=2)
 
+        ## Raptor model will have every game
         if model.label == "RAPTOR":
             ax.set_title(str(len(model.prediction_history)) + " Games")
 
         print(model.label + ": {:.3f} ".format(model.accuracy*100))
 
+    ## Plot line at 50% prediction accuracy; No noticeable effect if ylimit is set from 0.5 to 1
     ax.plot([format_dates([model.dates[0]]),
              format_dates([model.dates[-1]])], [.5, .5], c='darkgrey', ls='--', zorder=-1, alpha=.5)
 
